@@ -79,8 +79,8 @@ def downloadBusinessCasePDF(baselocator):
     row_count = browser_lib.get_element_count(baselocator)
     for row in range(1, row_count + 1):
         uii_locator = "XPath://*[@id='investments-table-object']/tbody/tr[" + str(row) + "]/td[1]"
+                uii = browser_lib.get_text(uii_locator)
         browser_lib.click_link(uii_locator)
-        uii = browser_lib.get_text(uii_locator)
         time.sleep(60)
         try:
             browser_lib.click_link("XPath://div//a[text() = 'Download Business Case PDF']")
