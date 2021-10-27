@@ -39,16 +39,16 @@ def getAgenciesData():
     for i in range(1,data_count+1):
         agency_name_locator = agency_name_locator_base + "[" + str(i) + "]"
         agency_amount_locator = agency_amount_locator_base + "[" + str(i) + "]"
-        agencies_name_keys[i] = browser_lib.get_text(agency_name_locator)
-        agencies_amount_values[i] = browser_lib.get_text(agency_amount_locator)
+        agencies_name_keys.append(browser_lib.get_text(agency_name_locator))
+        agencies_amount_values.append(browser_lib.get_text(agency_amount_locator))
         
     agencies_data_dict = {
-        "Agency" : agencies_name_keys,
-        "Amount" : agencies_amount_values,
+        "Agency": agencies_name_keys,
+        "Amount": agencies_amount_values,
     }
 
     # agencies_data_dict = {agencies_name_keys[i] : agencies_amount_values[i] for i in range(len(agencies_amounts_values))}
-    storeDataInExcel(agencies_data_dict, "/output/agencies_data.xlsx", "sheet1")
+    storeDataInExcel(agencies_data_dict, "output/agencies_data.xlsx", "sheet1")
     # print(agencies_data_dict)
 
 
@@ -57,7 +57,7 @@ def getTableColumns(locator):
     columns_list = []
     for col in range(1, col_count + 1):
         col_locator = locator + "[" + str(col) + "]"
-        columns_list[col] = browser_lib.get_text(col_locator)
+        columns_list.append(browser_lib.get_text(col_locator))
     return columns_list
 
 
@@ -70,9 +70,9 @@ def getTableData(baselocator):
     for row in range(1, row_count+1):
         for col in range(1, col_count + 1):
             cell_locator = "XPath://*[@id='investments-table-object']/tbody/tr[" + str(row) + "]/td[" + str(col) + "]"
-            row_data[col] = browser_lib.get_text(cell_locator)
+            row_data.append(browser_lib.get_text(cell_locator))
         data_list.append(row_data)
-    storeDataInExcel(data_list, "/output/agencies_data.xlsx", "sheet2")
+    storeDataInExcel(data_list, "output/agencies_data.xlsx", "sheet2")
 
 
 def downloadBusinessCasePDF(baselocator):
@@ -84,7 +84,7 @@ def downloadBusinessCasePDF(baselocator):
         time.sleep(60)
         try:
             browser_lib.click_link("XPath://div//a[text() = 'Download Business Case PDF']")
-            time.sleep(60)
+            time.sleep(30)
             if uii is not None:
                 compare_PDFdata_with_webTable(uii,row)
             else:
@@ -100,7 +100,7 @@ def compare_PDFdata_with_webTable(uii,row):
     if file_lib.does_file_exist(path):
         pdf_lib.open_pdf(path)
         text = pdf_lib.get_text_from_pdf(path, [1], trim=False)
-        print(text)
+        # print(text)
         title_excel_value = excel_lib.get_cell_value(row-1,0,"sheet2")
         uii_excel_value = excel_lib.get_cell_value(row-1, 2, "sheet2")
         title_pdf_value = pdf_lib.find_text("text:"+title_excel_value,only_closest=True,trim=False)
@@ -115,9 +115,12 @@ def compare_PDFdata_with_webTable(uii,row):
 def main():
     try:
         launchURL("https://itdashboard.gov/")
+        time.sleep(30)
         clickLink("XPath://a[@href='#home-dive-in']")            # Click DIVE-IN
+        time.sleep(30)
         getAgenciesData()                                        # Scrap Agencies data into excel
-        clickLink("XPath:(//a//span[contains(@class, 'h4 w200') and text()='"+Config.Agency_Name+"'])[1]")  # click on any one agency   #Click on Agenecy stored in Config file
+        clickLink("XPath:(//a//span[contains(@class, 'h4 w200') and text()='"+Config.Agency_Name+"'])[1]/..")  # click on any one agency   #Click on Agenecy stored in Config file
+        time.sleep(30)
         getTableData("XPath://*[@id='investments-table-object']/tbody/tr")               # store Investment table data into excel                                               # Individual Investment table data
         downloadBusinessCasePDF("XPath://*[@id='investments-table-object']/tbody/tr")             # Downloading PDFs
     finally:
